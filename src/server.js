@@ -1,11 +1,7 @@
 require("./db/connection");
 const express = require("express");
-const {
-    User
-} = require("../models/User.js");
-const {
-    Post
-} = require("../models/Post.js");
+const { User } = require("./models/User");
+const { Post } = require("./models/Post");
 
 const port = process.env.PORT || 5000;
 // init instance of express
@@ -14,7 +10,7 @@ const app = express()
 //Middleware
 app.use(express.json());
 
-//routes/endpoints
+//routes/endpoints health of server
 app.get("/health", (req, res) => {
     console.log(req.body);
     res.send({
@@ -24,6 +20,7 @@ app.get("/health", (req, res) => {
 
 //User
 app.get("/user", async (req, res) => {
+    //this is the route to get a user
     try {
         const allUsers = await User.find({});
         res.status(200).send(allUsers);
@@ -33,21 +30,21 @@ app.get("/user", async (req, res) => {
 })
 
 app.post("/user", async (req, res) => {
+    //this is the route to add a user
     try {
         const user = new User(req.body);
         const returnValue = await user.save();
+        console.log(`Successfully added ${returnValue.name}`)
         res.status(201).send(`Successfully added ${returnValue.name}`);
     } catch (error) {
         res.status(400).send(error);
     }
 });
 
-app.path("/user/:id", async (req, res) => {
+app.patch("/user/:id", async (req, res) => {
     //this will be our route to update a user
     try {
-        const user = await User.findByIDAndUpdate(req.param.id, req.body, {
-            new: true
-        });
+        const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
         console.log(user);
         res.status(200).send(user);
     } catch (error) {
@@ -68,6 +65,9 @@ app.delete("/user/:id", async (req, res) => {
         });
     }
 });
+
+
+
 
 //Blogpost
 app.get("/post", async (req, res) => {
